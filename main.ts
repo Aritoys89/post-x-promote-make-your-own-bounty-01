@@ -66,7 +66,15 @@ function run() {
   checkPostAddress(raw);
   const destinationDir = envDir("MAKEFUN_OUTPUT_DIR") || "/output";
   fs.mkdirSync(destinationDir, { recursive: true });
-  fs.writeFileSync(path.join(destinationDir, "POST.json"), raw);
+  const destination = path.join(destinationDir, "POST.json");
+  fs.writeFileSync(destination, raw);
+  // Read the copy back and compare it byte for byte with the source: a
+  // short or altered write must fail the run, never hand the grader a
+  // POST.json that differs from the one this repository carries.
+  const written = fs.readFileSync(destination);
+  if (!written.equals(raw)) {
+    throw new Error("the copied POST.json differs from the source bytes");
+  }
 }
 
 try {
